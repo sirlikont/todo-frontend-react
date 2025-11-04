@@ -2,19 +2,30 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { Input, Button, Checkbox, List, Col, Row, Space, Divider } from "antd";
 import { produce } from "immer";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+
 
 const API_BASE = "https://demo2.z-bit.ee";
-const API_TOKEN = "E5Q7-iN8HLCY-v8IUiEjkv7GK7EJkm1A";
+//const API_TOKEN = "E5Q7-iN8HLCY-v8IUiEjkv7GK7EJkm1A";
 
 export default function TaskList() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
+  const [API_TOKEN, setApiToken] = useState(null);
+
+useEffect(() => {
+  const token = localStorage.getItem("apiToken");
+  setApiToken(token);
+}, []);
 
   // --- 1️ Lae ülesanded ---
   useEffect(() => {
-    fetchTasks();
-  }, []);
+  if (!API_TOKEN) return; // ei tee fetchi, kui token puudub
+  fetchTasks();
+}, [API_TOKEN]);
 
   const fetchTasks = async () => {
+    const API_TOKEN = localStorage.getItem("apiToken");
     try {
       const res = await fetch(`${API_BASE}/tasks`, {
         headers: {
@@ -30,6 +41,7 @@ export default function TaskList() {
 
   // --- 2️ Lisa uus ülesanne ---
   const handleAddTask = async () => {
+    const API_TOKEN = localStorage.getItem("apiToken");
     try {
       const res = await fetch(`${API_BASE}/tasks`, {
         method: "POST",
@@ -51,6 +63,7 @@ export default function TaskList() {
 
   // --- 3️ Uuenda ülesanne ---
   const updateTask = async (task) => {
+    const API_TOKEN = localStorage.getItem("apiToken");
     try {
       await fetch(`${API_BASE}/tasks/${task.id}`, {
         method: "PUT",
@@ -88,6 +101,7 @@ export default function TaskList() {
 
   // --- 4️ Kustuta ülesanne ---
   const handleDeleteTask = async (task) => {
+    const API_TOKEN = localStorage.getItem("apiToken");
     try {
       await fetch(`${API_BASE}/tasks/${task.id}`, {
         method: "DELETE",
@@ -111,6 +125,17 @@ export default function TaskList() {
       <Col span={12}>
         <h1>Task List</h1>
         <Button onClick={handleAddTask}>Add Task</Button>
+        <Button
+            type="default"
+            style={{ float: "right" }}
+            onClick={() => {
+                localStorage.removeItem("apiToken"); // kustuta token
+                navigate("/logout"); // suuna Logout lehele
+            }}
+            >
+            Logout
+        </Button>
+
         <Divider />
         <List
           size="small"

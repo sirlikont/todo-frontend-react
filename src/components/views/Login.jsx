@@ -4,16 +4,30 @@ import { useNavigate } from "react-router";
 export default function Login() {
     const navigate = useNavigate();
 
-    const onFinish = (values) => {
-        console.log('Success:', values);
-        notification.success({
-            message: 'Logged in'
-        });
-        notification.error({
-            message: 'Wrong username or password'
-        });
-        navigate("/");
-    };
+    const onFinish = async (values) => {
+  try {
+    const res = await fetch(`https://demo2.z-bit.ee/users/get-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: values.username, password: values.password }),
+    });
+
+    if (!res.ok) throw new Error("Login failed");
+    const data = await res.json();
+
+    console.log("Login response:", data);  // <--- see näitab, mis täpselt server tagastab
+
+    // Salvesta token localStorage'i
+    localStorage.setItem("apiToken", data.access_token);
+
+    notification.success({ message: "Logged in" });
+    navigate("/");
+  } catch (err) {
+    console.error(err);
+    notification.error({ message: "Wrong username or password" });
+  }
+};
+
 
     return (
         <Row type="flex" justify="center" align="middle" style={{minHeight: '100vh'}}>

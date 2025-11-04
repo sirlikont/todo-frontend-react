@@ -2,13 +2,15 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 export default function Logout() {
-  // TODO import user session store, extract logout function
   const navigate = useNavigate();
 
   useEffect(() => {
-    // TODO run logout function to clear session token
-    navigate("/login");
+    // Kustuta token
+    localStorage.removeItem("apiToken");
+
+    // Suuna login lehele
+    navigate("/login", { replace: true }); // replace: true, et back nuppu vajutades ei läheks logouti
   }, [navigate]);
 
-  return null;
+  return null; // ei renderda midagi
 }
