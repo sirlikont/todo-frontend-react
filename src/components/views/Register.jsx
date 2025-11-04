@@ -8,19 +8,27 @@ export default function Register() {
 
   const onFinish = async (values) => {
     try {
-      const res = await fetch(`${API_BASE}/register`, {
+      const res = await fetch(`${API_BASE}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: values.username,
-          password: values.password
+          firstname: values.firstname,
+          lastname: values.lastname,
+          newPassword: values.password,
         }),
       });
 
       if (!res.ok) throw new Error("Registration failed");
 
+      const data = await res.json();
+      console.log("Register response:", data);
+
+      // Salvesta token localStorage'i
+      localStorage.setItem("apiToken", data.access_token);
+
       notification.success({ message: "User registered successfully!" });
-      navigate("/login");
+      navigate("/"); // suuna TaskList lehele
     } catch (err) {
       console.error(err);
       notification.error({ message: "Registration failed" });
@@ -29,12 +37,18 @@ export default function Register() {
 
   return (
     <Row justify="center" align="middle" style={{ minHeight: "100vh" }}>
-      <Col span={4}>
+      <Col span={6}>
         <h1>Register</h1>
         <Form
           name="register"
           layout="vertical"
-          initialValues={{ username: "", password: "" }}
+          initialValues={{
+            username: "",
+            firstname: "",
+            lastname: "",
+            password: "",
+            confirm: "",
+          }}
           onFinish={onFinish}
         >
           <Form.Item
@@ -44,6 +58,23 @@ export default function Register() {
           >
             <Input />
           </Form.Item>
+
+          <Form.Item
+            label="First Name"
+            name="firstname"
+            rules={[{ required: true, message: "Please input your first name!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Last Name"
+            name="lastname"
+            rules={[{ required: true, message: "Please input your last name!" }]}
+          >
+            <Input />
+          </Form.Item>
+
           <Form.Item
             label="Password"
             name="password"
@@ -51,6 +82,7 @@ export default function Register() {
           >
             <Input.Password />
           </Form.Item>
+
           <Form.Item
             label="Confirm Password"
             name="confirm"
@@ -67,6 +99,7 @@ export default function Register() {
           >
             <Input.Password />
           </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit">Register</Button>
           </Form.Item>
